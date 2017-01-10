@@ -9,7 +9,7 @@
 #include "cc20.h"
 #include "poly1305.h"
 
-void poly1305_macx(void*, void*, int, void*); 
+void poly1305_macx(void*, const void*, int, const void*); 
 
 // 2.8.2 AEAD test vector
 

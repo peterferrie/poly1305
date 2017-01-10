@@ -1,5 +1,5 @@
 ;
-;  Copyright © 2017 Odzhan. All Rights Reserved.
+;  Copyright © 2017 Odzhan, Peter Ferrie. All Rights Reserved.
 ;
 ;  Redistribution and use in source and binary forms, with or without
 ;  modification, are permitted provided that the following conditions are
@@ -30,7 +30,7 @@
 ; -----------------------------------------------
 ; Poly1305 MAC in x86 assembly
 ;
-; size: 339 bytes
+; size: 332 bytes
 ;
 ; global calls use cdecl convention
 ;
@@ -113,46 +113,45 @@ _poly1305_mulmodx:
     
     ; multiply
     mov    esi, ebx            ; esi = r
-    xor    ebx, ebx            ; i = 0
+    xor    ecx, ecx            ; i = 0
 mm_l0:
-    xor    ecx, ecx            ; j = 0
-    xor    edx, edx            ; u = 0
+    xor    eax, eax            ; j = 0
+    cdq                        ; u = 0
 mm_l1:
-    mov    eax, [esp+ecx*4]    ; eax = hr[j]
-    mov    ebp, ebx            ; ebp = i
-    sub    ebp, ecx            ; ebp = i - j
-    imul   eax, [esi+ebp*4]    ; eax *= r[i - j]
-    add    edx, eax            ; u += eax
-    inc    ecx                 ; j++
-    cmp    ecx, ebx            ; j <= i
+    mov    ebx, [esp+eax*4]    ; eax = hr[j]
+    mov    ebp, ecx            ; ebp = i
+    sub    ebp, eax            ; ebp = i - j
+    imul   ebx, [esi+ebp*4]    ; eax *= r[i - j]
+    add    edx, ebx            ; u += eax
+    inc    eax                 ; j++
+    cmp    eax, ecx            ; j <= i
     jbe    mm_l1
 mm_l2:
     push   17
     pop    ebp
     
-    cmp    ecx, ebp            ; i < 17
+    cmp    eax, ebp            ; i < 17
     jae    mm_l3
 
-    sub    ebp, ecx            ; ebp = 17 - j          
-    add    ebp, ebx            ; ebp += i
+    sub    ebp, eax            ; ebp = 17 - j          
+    add    ebp, ecx            ; ebp += i
     
     push   64
-    pop    eax
-    inc    ah                  ; eax = 320
-    imul   eax, [esi+ebp*4]    ; eax *= r[i+17-j]
-    imul   eax, [esp+ecx*4]    ; eax *= hr[j]
-    add    edx, eax            ; u += eax 
-    inc    ecx                 ; j++
+    pop    ebx
+    inc    bh                  ; eax = 320
+    imul   ebx, [esi+ebp*4]    ; eax *= r[i+17-j]
+    imul   ebx, [esp+eax*4]    ; eax *= hr[j]
+    add    edx, ebx            ; u += eax 
+    inc    eax                 ; j++
     jmp    mm_l2
 mm_l3:
-    mov    [edi+ebx*4], edx    ; acc[i] = u
-    inc    ebx
-    cmp    ebx, 17
+    mov    [edi+ecx*4], edx    ; acc[i] = u
+    inc    ecx
+    cmp    ecx, 17
     jb     mm_l0
     
     ; reduce
-    xor    ebx, ebx
-    xor    edx, edx            ; u = 0
+    cdq                        ; u = 0
 f_lx:    
     mov    cl, 16
     mov    esi, edi            ; esi = acc
@@ -164,8 +163,8 @@ f_l0:
     stosd                      ; acc[i] = eax
     shr    edx, 8              ; u >>= 8
     loop   f_l0
-    dec    ebx                 ;  
-    jnp    f_l1    
+    dec    ebp                 ;  
+    jp     f_l1    
     ; ---------------
     lodsd                      ; eax = acc[16]
     add    edx, eax            ; u += eax
@@ -192,9 +191,8 @@ _poly1305_macx:
     pushad
 
     lea    esi, [esp+32+4]
-    xor    eax, eax          ; eax = 0
-    cdq                      ; edx = 0
     xor    ecx, ecx          ; ecx = 0 
+    mul    ecx               ; eax/edx = 0
     mov    cl, 196           ; ecx = 196
     sub    esp, ecx
     mov    edi, esp
@@ -213,8 +211,7 @@ _poly1305_macx:
     lodsd
     xchg   esi, eax          ; esi = k
     
-    xchg   eax, edx          ; eax = 0
-    cdq                      ; edx = 0
+    mul    ecx               ; eax/edx = 0
     mov    cl,  16
     mov    edi, ebx          ; edi = r
     ; copy r
@@ -280,9 +277,8 @@ pm_l5:
 pm_l6:                       ; acc[i] ^= neg & (r[i] ^ acc[i]);
     lodsd                    ; eax = r[i]
     xor    eax, [edi]        ; eax ^= acc[i]
-    mov    edx, ebx          ; edx = neg
-    and    edx, eax          ; neg &= eax
-    xor    [edi], edx        ; acc[i] ^= edx
+    and    eax, ebx          ; neg &= eax
+    xor    [edi], eax        ; acc[i] ^= edx
     scasd                    ; edi += 4
     loop   pm_l6
     popad
