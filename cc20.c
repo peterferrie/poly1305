@@ -38,7 +38,6 @@ void cc20_init(cc20_state *s, const void *key,
     const uint32_t counter, const void *nonce)
 {
     uint32_t *n=(uint32_t*)nonce;
-    int      i;
     
     // "expand 32-byte k"
     s->w[0] = 0x61707865;

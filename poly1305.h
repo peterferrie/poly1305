@@ -2,6 +2,12 @@
 #ifndef POLY1305_H
 #define POLY1305_H
 
+#include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
+
+#include "macros.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif

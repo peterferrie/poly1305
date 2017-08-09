@@ -27,12 +27,7 @@
   ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
   POSSIBILITY OF SUCH DAMAGE. */
 
-#include <stdio.h>
-#include <stdint.h>
-#include <stdlib.h>
-
-#define memset(x,y,z) __stosb(x,y,z)
-#define memcpy(x,y,z) __movsb(x,y,z)
+#include "poly1305.h"
 
 /**********************************************
  *

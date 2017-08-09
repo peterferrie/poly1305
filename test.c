@@ -79,7 +79,7 @@ void aead_test(void)
   uint8_t  pkey[32], t[128], mac_data[512];
   uint8_t  ae_nonce[256], tag[16];
   uint64_t len, pos;
-  int      i, equ;
+  int      equ;
   
   // generate 96-bit nonce
   memset (ae_nonce, 0, sizeof(ae_nonce));
@@ -90,7 +90,7 @@ void aead_test(void)
   poly1305_key_gen(pkey, ae_key, ae_nonce);
   equ = memcmp(ae_tv, pkey, sizeof(pkey))==0;
   
-  printf ("\nAEAD %s test 1", 
+  printf ("AEAD %s test 1\n", 
       equ ? "PASSED" : "FAILED");
       
   // encrypt plaintext
@@ -101,7 +101,7 @@ void aead_test(void)
       
   equ = memcmp(ae_cipher, t, sizeof(ae_cipher))==0;
   
-  printf ("\nAEAD %s test 2", 
+  printf ("AEAD %s test 2\n", 
       equ ? "PASSED" : "FAILED");
       
   memset(mac_data, 0, sizeof(mac_data));
@@ -117,10 +117,10 @@ void aead_test(void)
   len = sizeof(ae_cipher);
   memcpy(&mac_data[pos+8], &len, sizeof(len));
   
-  poly1305_macx(tag, mac_data, pos+16, pkey); 
+  poly1305_mac(tag, mac_data, pos+16, pkey); 
   equ = memcmp(ae_tag, tag, sizeof(ae_tag))==0;
   
-  printf ("\nAEAD %s test 3", 
+  printf ("AEAD %s test 3\n", 
       equ ? "PASSED" : "FAILED");
       
   /*for (i=0; i<pos+16; i++) {
@@ -185,7 +185,7 @@ void poly1305_mac_test(void)
   uint8_t tag[16];
   int     equ;
   
-  poly1305_macx (tag, pm_msg, sizeof(pm_msg), pm_key);
+  poly1305_mac (tag, pm_msg, sizeof(pm_msg), pm_key);
   
   equ = memcmp(pm_tv, tag, 16)==0 ? 1 : 0;
   
